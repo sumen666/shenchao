@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>深潮科创园购厂计算器</title>
+    <!-- 添加到手机桌面（iOS） -->
+    <link rel="apple-touch-icon" href="icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="购厂计算器">
+    <!-- 添加到主屏幕（Android/PWA） -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3B82F6">
+    <!-- 浏览器标签页/收藏夹小图标 -->
+    <link rel="icon" type="image/png" href="icon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { 50: '#EFF6FF', 100: '#DBEAFE', 400: '#60A5FA', 500: '#3B82F6', 600: '#2563EB', 700: '#1D4ED8' },
+                        slate: { 50: '#F8FAFC', 100: '#F1F5F9', 200: '#E2E8F0', 300: '#CBD5E1', 400: '#94A3B8', 500: '#64748B', 600: '#475569', 700: '#334155', 800: '#1E293B' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { font-family: 'Noto Sans SC', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .card { background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04); }
+        .card-header { border-bottom: 1px solid #F1F5F9; padding-bottom: 14px; margin-bottom: 16px; }
+        .input-field { border: 1.5px solid #E2E8F0; border-radius: 10px; transition: all 0.2s; }
+        .input-field:focus { border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59,130,246,0.12); outline: none; }
+        .peer:checked + div { border-color: #3B82F6; background: #3B82F6; color: #FFFFFF; font-weight: 500; }
+        .row-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; }
+        .row-divider { border-top: 1px dashed #E2E8F0; margin: 4px 0; }
+        .val { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        .val-lg { font-family: 'JetBrains Mono', monospace; font-size: 1.35rem; font-weight: 700; }
+        .fade-in { animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 py-10">
+
+        <!-- Header -->
+        <header class="text-center mb-10 fade-in">
+            <div class="inline-flex items-center gap-3 mb-2">
+                <svg class="w-9 h-9 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+                <h1 class="text-3xl font-bold text-slate-800 tracking-tight">深潮科创园购厂计算器</h1>
+            </div>
+            <p class="text-slate-400 text-sm">工业厂房购买费用综合计算</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+
+            <!-- 左侧：参数输入 -->
+            <div class="lg:col-span-2">
+                <div class="card p-6 fade-in">
+                    <div class="card-header flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                        <span class="font-semibold text-slate-800 text-base">参数设置</span>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-500 mb-1.5">单价（元/平方米）</label>
+                            <input type="text" id="unitPrice" value="2700" inputmode="decimal"
+                                class="w-full input-field px-4 py-3 font-mono text-base bg-slate-50 text-left">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-500 mb-1.5">面积（平方米）</label>
+                            <input type="text" id="area" value="1554" inputmode="decimal"
+                                class="w-full input-field px-4 py-3 font-mono text-base bg-slate-50 text-left">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-500 mb-1.5">容积率</label>
+                            <div class="grid grid-cols-1 gap-2">
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="plotRatio" value="1.7" checked class="sr-only peer">
+                                    <div class="btn-radio text-center py-2.5 rounded-lg border border-slate-200 text-sm text-slate-500 transition">1.7</div>
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-500 mb-1.5">租金单价（元/平方米/月）</label>
+                            <input type="text" id="rentPrice" value="6" inputmode="decimal"
+                                class="w-full input-field px-4 py-3 font-mono text-base bg-slate-50 text-left">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-500 mb-1.5">年化利率（%）</label>
+                            <input type="text" id="annualRate" value="3.0" inputmode="decimal"
+                                class="w-full input-field px-4 py-3 font-mono text-base bg-slate-50 text-left">
+                        </div>
+                    </div>
+
+                    <div class="mt-5 p-3.5 bg-blue-50 rounded-xl border border-blue-100">
+                        <p class="text-xs text-blue-600 leading-relaxed">
+                            <span class="font-semibold">提示：</span>总金额含9%增值税。按揭款默认按总金额80%计算（可手动修改），向下取整到万元。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：结果 -->
+            <div class="lg:col-span-3 space-y-5">
+
+                <!-- 费用计算结果 -->
+                <div class="card p-5 fade-in">
+                    <div class="card-header flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="font-semibold text-slate-800 text-base">费用计算</span>
+                    </div>
+
+                    <div class="space-y-0">
+                        <div class="row-item px-1">
+                            <span class="text-sm text-slate-500">总金额（默认2成首付）</span>
+                            <span class="val-lg text-slate-800" id="totalPrice">0</span>
+                        </div>
+                        <div class="row-divider mx-1"></div>
+                        <div class="row-item px-1">
+                            <span class="text-sm text-slate-500">按揭款</span>
+                            <div class="flex items-center gap-1">
+                                <input type="text" id="loanAmountInput" inputmode="decimal" class="text-right bg-white border border-slate-200 rounded px-2 py-1 text-base w-24 font-mono font-semibold text-slate-700 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100" value="0" style="font-family: 'JetBrains Mono', monospace;">
+                                <span class="text-sm text-slate-500">万元</span>
+                            </div>
+                        </div>
+                        <div class="row-item px-1">
+                            <span class="text-sm text-slate-500">首付款</span>
+                            <span class="val text-slate-700" id="downPayment">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 月供计算 -->
+                <div class="card p-5 fade-in">
+                    <div class="card-header flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                        <span class="font-semibold text-slate-800 text-base">贷款还款</span>
+                    </div>
+
+                    <!-- 还款方式 -->
+                    <div class="mb-4">
+                        <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">还款方式</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="repayMethod" value="equal-payment" checked class="sr-only peer">
+                                <div class="btn-radio text-center py-2.5 rounded-lg border border-slate-200 text-sm text-slate-500 transition">等额本息</div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="repayMethod" value="equal-principal" class="sr-only peer">
+                                <div class="btn-radio text-center py-2.5 rounded-lg border border-slate-200 text-sm text-slate-500 transition">等额本金</div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 年限 -->
+                    <div class="mb-5">
+                        <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">贷款年限</label>
+                        <div class="grid grid-cols-4 gap-2">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="loanYears" value="5" class="sr-only peer">
+                                <div class="btn-radio text-center py-2 rounded-lg border border-slate-200 text-sm text-slate-500 transition font-mono">5年</div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="loanYears" value="10" checked class="sr-only peer">
+                                <div class="btn-radio text-center py-2 rounded-lg border border-slate-200 text-sm text-slate-500 transition font-mono">10年</div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="loanYears" value="15" class="sr-only peer">
+                                <div class="btn-radio text-center py-2 rounded-lg border border-slate-200 text-sm text-slate-500 transition font-mono">15年</div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="loanYears" value="20" class="sr-only peer">
+                                <div class="btn-radio text-center py-2 rounded-lg border border-slate-200 text-sm text-slate-500 transition font-mono">20年</div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 汇总数据 -->
+                    <div class="bg-slate-50 rounded-xl p-4 mb-4 space-y-0">
+                        <div class="row-item px-1">
+                            <span class="text-sm text-slate-500 font-medium" id="firstPaymentLabel">每月月供</span>
+                            <span class="val-lg text-blue-600" id="firstPayment">0</span>
+                        </div>
+                        <div class="row-divider mx-1"></div>
+                        <div class="row-item px-1">
+                            <span class="text-sm text-slate-500">总还款额</span>
+                            <span class="val text-slate-800" id="totalRepay">0</span>
+                        </div>
+                        <div class="row-item px-1">
+                            <span class="text-sm text-slate-500">总利息</span>
+                            <span class="val text-slate-800" id="totalInterest">0</span>
+                        </div>
+                        <div class="row-divider mx-1"></div>
+                        <div class="row-item px-1">
+                            <span class="text-sm text-slate-400">还款期数</span>
+                            <span class="val text-slate-400 text-sm" id="totalMonths">0</span>
+                        </div>
+                    </div>
+
+                    <!-- 还款计划 -->
+                    <button id="toggleSchedule"
+                        class="w-full py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition flex items-center justify-center gap-1.5 font-medium">
+                        <span id="toggleScheduleText">查看详细还款计划</span>
+                        <svg id="toggleScheduleIcon" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+
+                    <div id="scheduleContainer" class="hidden mt-3">
+                        <div class="rounded-xl border border-slate-200 overflow-hidden">
+                            <div class="overflow-x-auto max-h-80 overflow-y-auto">
+                                <table class="w-full text-sm">
+                                    <thead class="bg-slate-100 text-slate-500 sticky top-0">
+                                        <tr>
+                                            <th class="py-2.5 px-3 text-right font-medium whitespace-nowrap text-xs uppercase tracking-wide">期数</th>
+                                            <th class="py-2.5 px-3 text-right font-medium whitespace-nowrap text-xs uppercase tracking-wide">月供</th>
+                                            <th class="py-2.5 px-3 text-right font-medium whitespace-nowrap text-xs uppercase tracking-wide">本金</th>
+                                            <th class="py-2.5 px-3 text-right font-medium whitespace-nowrap text-xs uppercase tracking-wide">利息</th>
+                                            <th class="py-2.5 px-3 text-right font-medium whitespace-nowrap text-xs uppercase tracking-wide">剩余本金</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="scheduleBody" class="divide-y divide-slate-100 bg-white">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 税费计算 -->
+                <div class="card p-5 fade-in">
+                    <div class="card-header flex items-center gap-2">
+                        <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z"></path>
+                        </svg>
+                        <span class="font-semibold text-slate-800 text-base">税费计算</span>
+                    </div>
+
+                    <!-- 契税 -->
+                    <div class="bg-amber-50 rounded-xl p-4 mb-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium text-amber-700">契税（一次性）</span>
+                            <span class="val text-amber-700" id="deedTax">0</span>
+                        </div>
+                        <p class="text-xs text-amber-500 mt-1">按不含税金额的3%计算</p>
+                    </div>
+
+                    <div class="bg-violet-50 rounded-xl p-4 mb-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium text-violet-700">印花税（一次性）</span>
+                            <span class="val text-violet-700" id="stampTax">0</span>
+                        </div>
+                        <p class="text-xs text-violet-500 mt-1">按总金额的0.05%计算</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex items-center gap-1.5 mb-2">
+                                <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+                                <span class="text-sm font-medium text-slate-600">从租计征</span>
+                            </div>
+                            <div class="bg-slate-50 rounded-xl p-3.5 space-y-2">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-500">房产税（年租金×12%）</span>
+                                    <span class="val text-slate-600 text-sm" id="propertyTaxRent">0</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-500">土地使用税</span>
+                                    <span class="val text-slate-600 text-sm" id="landTax">0</span>
+                                </div>
+                                <div class="row-divider mx-0"></div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm font-medium text-slate-700">年度合计</span>
+                                    <span class="val text-blue-600 font-semibold" id="totalTaxRent">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex items-center gap-1.5 mb-2">
+                                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                <span class="text-sm font-medium text-slate-600">从价计征</span>
+                            </div>
+                            <div class="bg-slate-50 rounded-xl p-3.5 space-y-2">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-500">房产税（不含税金额×0.84%）</span>
+                                    <span class="val text-slate-600 text-sm" id="propertyTaxValue">0</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-500">土地使用税</span>
+                                    <span class="val text-slate-600 text-sm" id="landTax2">0</span>
+                                </div>
+                                <div class="row-divider mx-0"></div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm font-medium text-slate-700">年度合计</span>
+                                    <span class="val text-amber-600 font-semibold" id="totalTaxValue">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 企业税收抵免 -->
+                <div class="card p-5 fade-in bg-gradient-to-br from-blue-600 to-blue-700 text-white">
+                    <div class="card-header border-b border-blue-500/30 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
+                        </svg>
+                        <span class="font-semibold text-white text-base">企业税收抵免（20年合计）</span>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center py-1.5 border-b border-blue-500/20">
+                            <span class="text-blue-100 text-sm">当进项节约增值税</span>
+                            <span class="val text-white" id="vatDeduction">0</span>
+                        </div>
+                        <div class="flex justify-between items-center py-1.5 border-b border-blue-500/20">
+                            <span class="text-blue-100 text-sm">折旧抵扣所得税</span>
+                            <span class="val text-white" id="depreciationSavings">0</span>
+                        </div>
+                        <div class="flex justify-between items-center py-3 mt-1 bg-blue-500/30 rounded-xl px-3">
+                            <span class="text-white font-semibold text-sm">20年合计节约</span>
+                            <span class="val-lg text-white" id="totalSavings">0</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-blue-200/70 mt-3">折旧=不含税金额×（1-5%）×25%，增值税=不含税金额×9%</p>
+                </div>
+
+            </div>
+        </div>
+
+        <footer class="text-center mt-10 text-slate-300 text-xs">
+            <p>厂房计算器 · 数据仅供参考，实际费用以当地政策为准</p>
+        </footer>
+    </div>
+
+    <script>
+        // State
+        const state = {
+            unitPrice: 2700,
+            area: 1554,
+            plotRatio: 1.7,
+            rentPrice: 6,
+            annualRate: 3.0
+        };
+
+        // DOM Elements
+        const elements = {
+            unitPrice: document.getElementById('unitPrice'),
+            area: document.getElementById('area'),
+            rentPrice: document.getElementById('rentPrice'),
+            annualRate: document.getElementById('annualRate'),
+            totalPrice: document.getElementById('totalPrice'),
+            loanAmountInput: document.getElementById('loanAmountInput'),
+            downPayment: document.getElementById('downPayment'),
+            firstPayment: document.getElementById('firstPayment'),
+            firstPaymentLabel: document.getElementById('firstPaymentLabel'),
+            lastPayment: document.getElementById('lastPayment'),
+            lastPaymentLabel: document.getElementById('lastPaymentLabel'),
+            totalRepay: document.getElementById('totalRepay'),
+            totalInterest: document.getElementById('totalInterest'),
+            totalMonths: document.getElementById('totalMonths'),
+            scheduleBody: document.getElementById('scheduleBody'),
+            toggleSchedule: document.getElementById('toggleSchedule'),
+            scheduleContainer: document.getElementById('scheduleContainer'),
+            toggleScheduleIcon: document.getElementById('toggleScheduleIcon'),
+            toggleScheduleText: document.getElementById('toggleScheduleText'),
+            deedTax: document.getElementById('deedTax'),
+            propertyTaxRent: document.getElementById('propertyTaxRent'),
+            landTax: document.getElementById('landTax'),
+            landTax2: document.getElementById('landTax2'),
+            totalTaxRent: document.getElementById('totalTaxRent'),
+            propertyTaxValue: document.getElementById('propertyTaxValue'),
+            totalTaxValue: document.getElementById('totalTaxValue'),
+            stampTax: document.getElementById('stampTax'),
+            vatDeduction: document.getElementById('vatDeduction'),
+            depreciationSavings: document.getElementById('depreciationSavings'),
+            totalSavings: document.getElementById('totalSavings')
+        };
+
+        // Format number to 万元 (2 decimal places)
+        function formatWan(num) {
+            return (num / 10000).toFixed(2) + ' 万元';
+        }
+
+        // Format number in 万元 (integer)
+        function formatWanInt(num) {
+            return Math.floor(num / 10000) + ' 万元';
+        }
+
+        // Format number with comma
+        function formatNumber(num) {
+            return num.toLocaleString('zh-CN', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+        }
+
+        // Round down to nearest 10,000
+        function roundDownToTenThousand(num) {
+            return Math.floor(num / 10000) * 10000;
+        }
+
+        // Round up to nearest 10,000
+        function roundUpToTenThousand(num) {
+            return Math.ceil(num / 10000) * 10000;
+        }
+
+        // 等额本息
+        function buildEqualPaymentSchedule(principal, annualRate, years) {
+            const monthlyRate = annualRate / 100 / 12;
+            const months = years * 12;
+            const schedule = [];
+            let monthlyPayment;
+            if (monthlyRate === 0) {
+                monthlyPayment = principal / months;
+            } else {
+                const factor = Math.pow(1 + monthlyRate, months);
+                monthlyPayment = principal * (monthlyRate * factor) / (factor - 1);
+            }
+            let remaining = principal;
+            let totalInterest = 0;
+            for (let i = 1; i <= months; i++) {
+                const interest = remaining * monthlyRate;
+                let principalPart = monthlyPayment - interest;
+                if (i === months) principalPart = remaining;
+                remaining -= principalPart;
+                if (remaining < 0) remaining = 0;
+                totalInterest += interest;
+                schedule.push({ period: i, payment: interest + principalPart, principal: principalPart, interest: interest, remaining: remaining });
+            }
+            return { schedule, firstPayment: monthlyPayment, lastPayment: schedule[months - 1].payment, totalRepay: monthlyPayment * months, totalInterest, months };
+        }
+
+        // 等额本金
+        function buildEqualPrincipalSchedule(principal, annualRate, years) {
+            const monthlyRate = annualRate / 100 / 12;
+            const months = years * 12;
+            const monthlyPrincipal = principal / months;
+            const schedule = [];
+            let remaining = principal;
+            let totalInterest = 0;
+            let totalRepay = 0;
+            for (let i = 1; i <= months; i++) {
+                const interest = remaining * monthlyRate;
+                const payment = monthlyPrincipal + interest;
+                remaining -= monthlyPrincipal;
+                if (remaining < 0) remaining = 0;
+                totalInterest += interest;
+                totalRepay += payment;
+                schedule.push({ period: i, payment, principal: monthlyPrincipal, interest, remaining });
+            }
+            return { schedule, firstPayment: schedule[0].payment, lastPayment: schedule[months - 1].payment, totalRepay, totalInterest, months };
+        }
+
+        // Calculate all results
+        function calculate() {
+            state.unitPrice = parseFloat(elements.unitPrice.value) || 0;
+            state.area = parseFloat(elements.area.value) || 0;
+            state.rentPrice = parseFloat(elements.rentPrice.value) || 0;
+            state.annualRate = parseFloat(elements.annualRate.value) || 0;
+            state.plotRatio = parseFloat(document.querySelector('input[name="plotRatio"]:checked').value);
+            const repayMethod = document.querySelector('input[name="repayMethod"]:checked').value;
+            const loanYears = parseInt(document.querySelector('input[name="loanYears"]:checked').value);
+
+            const totalPrice = state.unitPrice * state.area;
+            // 按揭款: 优先使用手动输入值（万元），否则按总金额80%向下取整到万元
+            let loanAmount;
+            const manualLoan = parseFloat(elements.loanAmountInput.value);
+            if (manualLoan && manualLoan > 0) {
+                loanAmount = manualLoan * 10000;
+            } else {
+                loanAmount = roundDownToTenThousand(totalPrice * 0.8);
+                // 填充默认值到input（万元）
+                elements.loanAmountInput.value = Math.round(loanAmount / 10000);
+            }
+            const downPayment = totalPrice - loanAmount;
+
+            elements.totalPrice.textContent = formatNumber(totalPrice);
+            elements.downPayment.textContent = formatNumber(downPayment);
+
+            let result;
+            if (repayMethod === 'equal-payment') {
+                result = buildEqualPaymentSchedule(loanAmount, state.annualRate, loanYears);
+                elements.firstPaymentLabel.textContent = '每月月供';
+            } else {
+                result = buildEqualPrincipalSchedule(loanAmount, state.annualRate, loanYears);
+                elements.firstPaymentLabel.textContent = '首月月供';
+            }
+
+            elements.firstPayment.textContent = formatWan(result.firstPayment);
+            elements.totalRepay.textContent = formatWan(result.totalRepay);
+            elements.totalInterest.textContent = formatWan(result.totalInterest);
+            elements.totalMonths.textContent = result.months + ' 期';
+
+            // 还款计划表
+            let html = '';
+            for (let i = 0; i < result.schedule.length; i++) {
+                const row = result.schedule[i];
+                const bg = i % 2 === 0 ? 'bg-white' : 'bg-slate-50/60';
+                html += '<tr class="' + bg + '">' +
+                    '<td class="py-2 px-3 text-right text-slate-500 font-mono text-xs">' + row.period + '</td>' +
+                    '<td class="py-2 px-3 text-right text-slate-700 font-mono text-sm font-medium">' + formatNumber(row.payment) + '</td>' +
+                    '<td class="py-2 px-3 text-right text-slate-500 font-mono text-xs">' + formatNumber(row.principal) + '</td>' +
+                    '<td class="py-2 px-3 text-right text-amber-600 font-mono text-xs">' + formatNumber(row.interest) + '</td>' +
+                    '<td class="py-2 px-3 text-right text-slate-400 font-mono text-xs">' + formatNumber(row.remaining) + '</td>' +
+                    '</tr>';
+            }
+            elements.scheduleBody.innerHTML = html;
+
+            // 税费
+            const priceExTax = totalPrice / 1.09;
+            const deedTax = priceExTax * 0.03;
+            const stampTax = totalPrice * 0.0005;
+            const annualRent = state.area * state.rentPrice * 12;
+            const propertyTaxRent = annualRent * 0.12;
+            const landTax = (state.area / state.plotRatio) * 3;
+            const totalTaxRent = propertyTaxRent + landTax;
+            const propertyTaxValue = priceExTax * 0.0084;
+            const totalTaxValue = propertyTaxValue + landTax;
+
+            elements.deedTax.textContent = formatWan(deedTax);
+            elements.stampTax.textContent = formatWan(stampTax);
+            elements.propertyTaxRent.textContent = formatWan(propertyTaxRent);
+            elements.landTax.textContent = formatWan(landTax);
+            elements.landTax2.textContent = formatWan(landTax);
+            elements.totalTaxRent.textContent = formatWan(totalTaxRent);
+            elements.propertyTaxValue.textContent = formatWan(propertyTaxValue);
+            elements.totalTaxValue.textContent = formatWan(totalTaxValue);
+
+            // 税收抵免
+            const vatDeduction = priceExTax * 0.09;
+            const depreciationSavings = priceExTax * (1 - 0.05) * 0.25;
+            const totalSavings = vatDeduction + depreciationSavings;
+            elements.vatDeduction.textContent = formatWan(vatDeduction);
+            elements.depreciationSavings.textContent = formatWan(depreciationSavings);
+            elements.totalSavings.textContent = formatWan(totalSavings);
+        }
+
+        // Event listeners
+        elements.unitPrice.addEventListener('input', function () {
+            elements.loanAmountInput.value = ''; // 单价变化后重置按揭款，让其按80%默认重新计算
+            calculate();
+        });
+        elements.area.addEventListener('input', function () {
+            elements.loanAmountInput.value = ''; // 面积变化后重置按揭款，让其按80%默认重新计算
+            calculate();
+        });
+        elements.rentPrice.addEventListener('input', calculate);
+        elements.annualRate.addEventListener('input', calculate);
+        elements.loanAmountInput.addEventListener('input', calculate);
+        document.querySelectorAll('input[name="plotRatio"]').forEach(r => r.addEventListener('change', calculate));
+        document.querySelectorAll('input[name="repayMethod"]').forEach(r => r.addEventListener('change', calculate));
+        document.querySelectorAll('input[name="loanYears"]').forEach(r => r.addEventListener('change', calculate));
+
+        // Toggle schedule
+        elements.toggleSchedule.addEventListener('click', function () {
+            const isHidden = elements.scheduleContainer.classList.contains('hidden');
+            if (isHidden) {
+                elements.scheduleContainer.classList.remove('hidden');
+                elements.toggleScheduleIcon.style.transform = 'rotate(180deg)';
+                elements.toggleScheduleText.textContent = '收起详细还款计划';
+            } else {
+                elements.scheduleContainer.classList.add('hidden');
+                elements.toggleScheduleIcon.style.transform = 'rotate(0deg)';
+                elements.toggleScheduleText.textContent = '查看详细还款计划';
+            }
+        });
+
+        calculate();
+    </script>
+</body>
+</html>
